@@ -1,3 +1,8 @@
+import subprocess
+import sys
+import wave
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -8,6 +13,10 @@ SR = 48000
 
 def silence(seconds, level=1e-4, seed=0):
     return np.random.default_rng(seed).normal(0, level, int(SR * seconds)).astype(np.float32)
+
+
+def noise_like(x, level, seed):
+    return np.random.default_rng(seed).normal(0, level, len(x)).astype(np.float32)
 
 
 def make_snap(amp=0.5, seed=1):
@@ -108,6 +117,97 @@ def test_block_size_does_not_change_results():
     for at in (0.5, 2.5, 4.5):
         place(sig, make_snap(seed=int(at * 10)), at)
     assert run(sig, block=256) == run(sig, block=4096) == run(sig, block=333)
+
+
+# ---------------------------------------------------------------- real recordings
+DATA = Path(__file__).parent / "data"
+# file -> snaps we expect to catch. The first recording has 10 snaps (0.98, 2.48, 3.75, 4.95,
+# 6.39, 7.57, 8.72, 9.85, 10.29, 10.72 s); the rest fall inside the 1.5 s refractory period.
+REAL_SNAPS = {
+    "snaps_finger_clicks_pd.wav": [0.98, 2.48, 4.95, 7.57, 9.85],
+    "snaps_snapping_fingers_cc0.wav": [1.13],
+}
+
+
+def read_48k(path):
+    with wave.open(str(path)) as w:
+        x = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float64) / 32768
+        sr = w.getframerate()
+    n = int(round(len(x) * SR / sr))                  # band-limited resample to 48 kHz
+    spec = np.fft.rfft(x)
+    out = np.zeros(n // 2 + 1, complex)
+    out[:len(spec)] = spec[: n // 2 + 1]
+    return (np.fft.irfft(out, n) * (n / len(x))).astype(np.float32)
+
+
+@pytest.mark.parametrize("name", REAL_SNAPS)
+def test_real_snap_recordings(name):
+    x = read_48k(DATA / name)
+    x = x / np.abs(x).max() * 0.3 + noise_like(x, 0.002, 9)
+    hits = run(x)
+    expected = REAL_SNAPS[name]
+    assert len(hits) == len(expected)
+    for h, t in zip(hits, expected):
+        assert abs(h - t) < 0.04
+
+
+VOICES = ("Microsoft David Desktop", "Microsoft Zira Desktop")
+SENTENCES = (
+    "Okay, let's talk about the project. Kick the tires, check the ticket, pick the top pack. "
+    "Stop, take that, keep it tight. Great, perfect, thank you, pretty cool actually.",
+    "Tamam kanka, şimdi bak, şu kodu kontrol et. Çok iyi, tebrikler, peki ya şu kısım? "
+    "Tık tık, kapıyı kapat, çabuk çık. Takım toplantısı saat üçte, kesinlikle katıl.",
+)
+
+
+@pytest.fixture(scope="session")
+def loud_speech(tmp_path_factory):
+    """Loud synthetic speech (like a headset mic right at the mouth), made with the
+    Windows speech engine so no voice recordings need to live in the repo."""
+    if sys.platform != "win32":
+        pytest.skip("needs the Windows speech engine")
+    out = tmp_path_factory.mktemp("speech")
+    script = ["Add-Type -AssemblyName System.Speech",
+              "$f = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(48000, 16, 1)"]
+    files = []
+    for vi, voice in enumerate(VOICES):
+        for si, text in enumerate(SENTENCES):
+            path = out / f"{vi}-{si}.wav"
+            files.append(path)
+            script += ["$s = New-Object System.Speech.Synthesis.SpeechSynthesizer",
+                       f"try {{ $s.SelectVoice('{voice}') }} catch {{ }}",
+                       f"$s.SetOutputToWaveFile('{path}', $f)",
+                       "$s.Speak('{}')".format(text.replace("'", "''")), "$s.Dispose()"]
+    ps1 = out / "make_speech.ps1"
+    ps1.write_text("\n".join(script), encoding="utf-8-sig")
+    try:
+        subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ps1)],
+                       check=True, capture_output=True, timeout=120)
+    except Exception as e:
+        pytest.skip(f"speech synthesis unavailable: {e}")
+    clips = []
+    for i, path in enumerate(files):
+        x = read_48k(path)
+        clips.append(x / np.abs(x).max() * 0.9 + noise_like(x, 0.002, 20 + i))
+    return clips
+
+
+@pytest.mark.parametrize("sensitivity", [4, 6])
+def test_loud_speech_is_not_a_snap(loud_speech, sensitivity):
+    hits = [run(clip, sensitivity=sensitivity) for clip in loud_speech]
+    assert sum(len(h) for h in hits) == 0, hits
+
+
+def test_snap_in_a_pause_between_sentences(loud_speech):
+    clicks = read_48k(DATA / "snaps_finger_clicks_pd.wav")
+    snap = clicks[int(0.93 * SR): int(1.3 * SR)]
+    snap = snap / np.abs(snap).max() * 0.3
+    pause = silence(0.8, level=0.002, seed=31)
+    sig = np.concatenate([loud_speech[0], pause, snap, pause, loud_speech[1]])
+    snap_at = (len(loud_speech[0]) + len(pause)) / SR + 0.05
+    hits = run(sig, sensitivity=6)
+    assert len(hits) == 1, hits
+    assert abs(hits[0] - snap_at) < 0.04
 
 
 def test_level_rises_on_a_snap():
