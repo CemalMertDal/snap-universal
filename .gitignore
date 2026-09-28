@@ -1,0 +1,36 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+
+# --- Sanal ortam ---
+.venv/
+.venv-build/
+venv/
+env/
+
+# --- Uygulamanın ürettiği yerel dosyalar ---
+# settings.json kişisel kamera/mikrofon seçimlerini tutar, repoya girmemeli.
+settings.json
+crash.log
+*.log
+
+# --- Editör / IDE ---
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- İşletim sistemi ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Claude Code yerel ayarları ---
+.claude/settings.local.json

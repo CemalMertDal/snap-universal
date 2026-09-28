@@ -1,0 +1,283 @@
+"""Tiny TR/EN string table. Call set_language() once before building the UI."""
+import sys
+
+_TR = {
+    "app.already_running": "Snap zaten çalışıyor.",
+    "nav.home": "Ana Sayfa",
+    "nav.effects": "Efektler",
+    "nav.settings": "Ayarlar",
+
+    "home.title": "Canlı görüntü",
+    "home.subtitle": "Görüntülü görüşmede diğerlerinin göreceği görüntü",
+    "home.start": "Başlat",
+    "home.stop": "Durdur",
+    "home.capture": "Boş odayı kaydet",
+    "home.toggle": "Kaybol / Geri gel",
+    "home.countdown": "Kadrajdan çık… {n}",
+    "home.capturing": "Oda kaydediliyor…",
+    "home.placeholder": "Başlat'a bas, görüntün burada görünecek",
+    "home.mic_level": "Mikrofon seviyesi",
+    "home.mic_hint": "Şıklatınca çubuk çizgiyi geçmeli",
+    "home.mic_off": "Şıklatma kapalı",
+    "home.effect": "Efekt: {name}",
+    "home.output": "Çıkış: {name}",
+    "home.steps": "1. Başlat  ·  2. Boş odayı kaydet  ·  3. Şıklat",
+
+    "status.stopped": "Durdu",
+    "status.no_plate": "Boş oda kaydedilmedi",
+    "status.live": "Görünürsün",
+    "status.vanishing": "Kayboluyor…",
+    "status.gone": "Kayıpsın",
+    "status.appearing": "Geri geliyor…",
+
+    "effects.title": "Kaybolma efektleri",
+    "effects.subtitle": "Şıklattığında nasıl kaybolacağını seç",
+    "effects.duration": "Efekt süresi",
+    "effects.seconds": "{s} sn",
+    "effects.try": "Dene",
+    "effects.try_hint": "Denemek için önce Başlat'a basıp boş odayı kaydet",
+
+    "effect.cloud.name": "Puf Bulutu",
+    "effect.cloud.desc": "Bulutlar seni sarar, puf diye silinirsin",
+    "effect.dust.name": "Toz",
+    "effect.dust.desc": "Parça parça toza dönüşüp rüzgarla savrulursun",
+    "effect.burn.name": "Yanma",
+    "effect.burn.desc": "Kıvılcımlar saçan bir alev çizgisi üzerinden geçer",
+    "effect.vortex.name": "Girdap",
+    "effect.vortex.desc": "Dönerek tek bir noktaya emilirsin",
+    "effect.melt.name": "Erime",
+    "effect.melt.desc": "Damla damla aşağı akıp erirsin",
+    "effect.glitch.name": "Glitch",
+    "effect.glitch.desc": "Dijital parazitle bozulup kesilirsin",
+    "effect.beam.name": "Işınlanma",
+    "effect.beam.desc": "Işık sütununda pırıltılarla ışınlanırsın",
+    "effect.random.name": "Rastgele",
+    "effect.random.desc": "Her şıklatmada başka bir efekt",
+
+    "settings.title": "Ayarlar",
+    "settings.devices": "Cihazlar",
+    "settings.camera": "Kamera",
+    "settings.camera_desc": "Gerçek web kameran",
+    "settings.microphone": "Mikrofon",
+    "settings.microphone_desc": "Şıklatmayı dinleyeceğimiz mikrofon",
+    "settings.resolution": "Çözünürlük",
+    "settings.resolution_desc": "Yavaşsa düşür",
+    "settings.backend": "Sanal kamera",
+    "settings.backend_desc": "Görüşme uygulamasında seçeceğin kamera",
+    "settings.refresh": "Cihazları yenile",
+    "settings.snap": "Şıklatma",
+    "settings.snap_enabled": "Şıklatınca kaybol",
+    "settings.snap_enabled_desc": "Kapalıyken sadece buton ve kısayollar çalışır",
+    "settings.sensitivity": "Hassasiyet",
+    "settings.sensitivity_desc": "Kendi kendine tetikleniyorsa düşür, algılamıyorsa artır",
+    "settings.hotkeys": "Kısayollar",
+    "settings.hotkey_toggle": "Kaybol / geri gel",
+    "settings.hotkey_capture": "Boş odayı kaydet",
+    "settings.hotkeys_desc": "Uygulama arka plandayken de çalışır",
+    "settings.appearance": "Görünüm",
+    "settings.theme": "Tema",
+    "settings.theme_desc": "Uygulamanın renk modu",
+    "settings.language": "Dil",
+    "settings.language_desc": "Yeniden başlatınca uygulanır",
+    "settings.behaviour": "Davranış",
+    "settings.close_to_tray": "Kapatınca tepsiye küçült",
+    "settings.close_to_tray_desc": "Pencereyi kapatsan da sanal kamera çalışmaya devam eder",
+    "settings.preview": "Önizleme",
+    "settings.preview_desc": "Kapatırsan biraz daha az işlemci kullanır",
+    "settings.about": "Hakkında",
+    "settings.about_desc": "Sürüm {version} · GPL-3.0 lisanslı açık kaynak",
+    "settings.github": "GitHub'da aç",
+    "settings.locked": "Değiştirmek için önce durdur",
+    "settings.restart": "Dil değişikliği yeniden başlatınca uygulanır",
+    "settings.no_camera": "(kamera bulunamadı)",
+    "settings.no_mic": "(mikrofon bulunamadı)",
+
+    "theme.auto": "Sistem",
+    "theme.light": "Açık",
+    "theme.dark": "Koyu",
+    "lang.auto": "Sistem",
+    "lang.tr": "Türkçe",
+    "lang.en": "English",
+    "backend.auto": "Otomatik",
+    "backend.unitycapture": "UnityCapture",
+    "backend.obs": "OBS Virtual Camera",
+
+    "tray.show": "Göster",
+    "tray.toggle": "Kaybol / Geri gel",
+    "tray.quit": "Çık",
+    "tray.still_running": "Snap arka planda çalışmaya devam ediyor",
+
+    "log.started": "Sanal kamera hazır: {name}",
+    "log.stopped": "Durduruldu",
+    "log.need_plate": "Önce boş odayı kaydet",
+    "log.plate_ok": "Boş oda kaydedildi",
+    "log.plate_person": "Kadrajda hâlâ biri var, tekrar dene",
+    "log.busy": "Geçiş sürüyor, biraz bekle",
+    "log.mic_ok": "Mikrofon dinleniyor",
+    "log.mic_failed": "Mikrofon açılamadı: {error}",
+    "log.engine_error": "Hata oluştu, durduruldu: {error}",
+    "log.hotkeys_failed": "Global kısayollar kullanılamıyor: {error}",
+
+    "err.title": "Başlatılamadı",
+    "err.no_camera": "Kamera seçilmedi",
+    "err.camera": "Kameradan görüntü alınamadı. Başka bir uygulama kullanıyor olabilir.",
+    "err.vcam_not_installed": "Sanal kamera sürücüsü bulunamadı. UnityCapture ya da OBS Studio kur (README'ye bak).",
+    "err.vcam_in_use": "OBS'in kendi sanal kamerası açık. OBS'te 'Stop Virtual Camera'ya bas.",
+    "err.vcam_failed": "Sanal kamera açılamadı: {error}",
+    "err.model": "Yapay zeka modeli yüklenemedi: {error}",
+}
+
+_EN = {
+    "app.already_running": "Snap is already running.",
+    "nav.home": "Home",
+    "nav.effects": "Effects",
+    "nav.settings": "Settings",
+
+    "home.title": "Live view",
+    "home.subtitle": "What others will see in your video call",
+    "home.start": "Start",
+    "home.stop": "Stop",
+    "home.capture": "Capture empty room",
+    "home.toggle": "Vanish / Come back",
+    "home.countdown": "Step out of frame… {n}",
+    "home.capturing": "Capturing the room…",
+    "home.placeholder": "Press Start and your video shows up here",
+    "home.mic_level": "Mic level",
+    "home.mic_hint": "When you snap, the bar should cross the line",
+    "home.mic_off": "Snap detection is off",
+    "home.effect": "Effect: {name}",
+    "home.output": "Output: {name}",
+    "home.steps": "1. Start  ·  2. Capture empty room  ·  3. Snap",
+
+    "status.stopped": "Stopped",
+    "status.no_plate": "Empty room not captured",
+    "status.live": "Visible",
+    "status.vanishing": "Vanishing…",
+    "status.gone": "Vanished",
+    "status.appearing": "Coming back…",
+
+    "effects.title": "Vanish effects",
+    "effects.subtitle": "Pick how you disappear when you snap",
+    "effects.duration": "Effect duration",
+    "effects.seconds": "{s} s",
+    "effects.try": "Try it",
+    "effects.try_hint": "To try it, press Start and capture the empty room first",
+
+    "effect.cloud.name": "Cloud Puff",
+    "effect.cloud.desc": "Clouds wrap around you and, poof, you're gone",
+    "effect.dust.name": "Dust",
+    "effect.dust.desc": "You crumble into dust and drift away",
+    "effect.burn.name": "Burn",
+    "effect.burn.desc": "A glowing burn line sweeps over you, embers flying",
+    "effect.vortex.name": "Vortex",
+    "effect.vortex.desc": "You spiral into a single point",
+    "effect.melt.name": "Melt",
+    "effect.melt.desc": "You drip and melt away",
+    "effect.glitch.name": "Glitch",
+    "effect.glitch.desc": "You break up in digital noise",
+    "effect.beam.name": "Beam",
+    "effect.beam.desc": "You beam out in a column of light",
+    "effect.random.name": "Random",
+    "effect.random.desc": "A different effect every snap",
+
+    "settings.title": "Settings",
+    "settings.devices": "Devices",
+    "settings.camera": "Camera",
+    "settings.camera_desc": "Your real webcam",
+    "settings.microphone": "Microphone",
+    "settings.microphone_desc": "The mic we listen to for snaps",
+    "settings.resolution": "Resolution",
+    "settings.resolution_desc": "Lower it if things are slow",
+    "settings.backend": "Virtual camera",
+    "settings.backend_desc": "The camera you pick in your call app",
+    "settings.refresh": "Refresh devices",
+    "settings.snap": "Snap",
+    "settings.snap_enabled": "Vanish when I snap",
+    "settings.snap_enabled_desc": "When off, only the button and hotkeys work",
+    "settings.sensitivity": "Sensitivity",
+    "settings.sensitivity_desc": "Lower it if it triggers by itself, raise it if it misses snaps",
+    "settings.hotkeys": "Hotkeys",
+    "settings.hotkey_toggle": "Vanish / come back",
+    "settings.hotkey_capture": "Capture empty room",
+    "settings.hotkeys_desc": "Work even while the app is in the background",
+    "settings.appearance": "Appearance",
+    "settings.theme": "Theme",
+    "settings.theme_desc": "The app's colour mode",
+    "settings.language": "Language",
+    "settings.language_desc": "Applies after restart",
+    "settings.behaviour": "Behaviour",
+    "settings.close_to_tray": "Close to tray",
+    "settings.close_to_tray_desc": "The virtual camera keeps running when you close the window",
+    "settings.preview": "Preview",
+    "settings.preview_desc": "Turn off to save a little CPU",
+    "settings.about": "About",
+    "settings.about_desc": "Version {version} · open source under GPL-3.0",
+    "settings.github": "Open on GitHub",
+    "settings.locked": "Stop first to change this",
+    "settings.restart": "The language change applies after a restart",
+    "settings.no_camera": "(no camera found)",
+    "settings.no_mic": "(no microphone found)",
+
+    "theme.auto": "System",
+    "theme.light": "Light",
+    "theme.dark": "Dark",
+    "lang.auto": "System",
+    "lang.tr": "Türkçe",
+    "lang.en": "English",
+    "backend.auto": "Automatic",
+    "backend.unitycapture": "UnityCapture",
+    "backend.obs": "OBS Virtual Camera",
+
+    "tray.show": "Show",
+    "tray.toggle": "Vanish / Come back",
+    "tray.quit": "Quit",
+    "tray.still_running": "Snap keeps running in the background",
+
+    "log.started": "Virtual camera ready: {name}",
+    "log.stopped": "Stopped",
+    "log.need_plate": "Capture the empty room first",
+    "log.plate_ok": "Empty room captured",
+    "log.plate_person": "Someone is still in frame, try again",
+    "log.busy": "A transition is running, hold on",
+    "log.mic_ok": "Listening to the microphone",
+    "log.mic_failed": "Couldn't open the microphone: {error}",
+    "log.engine_error": "Something went wrong, stopped: {error}",
+    "log.hotkeys_failed": "Global hotkeys are unavailable: {error}",
+
+    "err.title": "Couldn't start",
+    "err.no_camera": "No camera selected",
+    "err.camera": "Couldn't read from the camera. Another app may be using it.",
+    "err.vcam_not_installed": "No virtual camera driver found. Install UnityCapture or OBS Studio (see README).",
+    "err.vcam_in_use": "OBS's own virtual camera is running. Press 'Stop Virtual Camera' in OBS.",
+    "err.vcam_failed": "Couldn't open the virtual camera: {error}",
+    "err.model": "Couldn't load the AI model: {error}",
+}
+
+STRINGS = {"tr": _TR, "en": _EN}
+_current = "en"
+
+
+def detect_language() -> str:
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            langid = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+            if langid & 0x3FF == 0x1F:  # LANG_TURKISH
+                return "tr"
+        except Exception:
+            pass
+    return "en"
+
+
+def set_language(code: str) -> None:
+    global _current
+    _current = code if code in STRINGS else "en"
+
+
+def language() -> str:
+    return _current
+
+
+def t(key: str, **fmt) -> str:
+    text = STRINGS[_current].get(key) or STRINGS["en"].get(key) or key
+    return text.format(**fmt) if fmt else text
