@@ -29,6 +29,10 @@ if ($proc.ExitCode -ne 0) { throw "Snap.exe --selftest failed (exit $($proc.Exit
 $version = & $py -c "import snap; print(snap.__version__)"
 $zip = Join-Path $root "dist\Snap-v$version-win64.zip"
 if (Test-Path $zip) { Remove-Item $zip }
-Compress-Archive -Path (Join-Path $root "dist\Snap") -DestinationPath $zip
+# the freshly written exe can stay locked for a moment (selftest exit, antivirus scan)
+for ($i = 1; $i -le 5; $i++) {
+    try { Compress-Archive -Path (Join-Path $root "dist\Snap") -DestinationPath $zip -ErrorAction Stop; break }
+    catch { if ($i -eq 5) { throw }; if (Test-Path $zip) { Remove-Item $zip }; Start-Sleep -Seconds 3 }
+}
 $sizeMb = [math]::Round((Get-Item $zip).Length / 1MB, 1)
 Write-Host "Built $zip ($sizeMb MB)"
