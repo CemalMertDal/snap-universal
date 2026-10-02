@@ -10,35 +10,34 @@ def _room(h=120, w=160, seed=0):
 
 def test_median_removes_a_passing_object():
     room = _room()
-    pb = PlateBuilder(needed=15, min_ok=5)
-    empty = np.zeros(room.shape[:2], np.float32)
+    pb = PlateBuilder(needed=15)
     for i in range(15):
         frame = room.copy()
         if i % 3 == 0:                                  # something passes in 5 of 15 frames
             frame[40:80, 60:100] = (0, 255, 0)
-        pb.add(frame, empty)
-    assert pb.done and pb.accepted == 15
-    plate = pb.build()
-    assert np.array_equal(plate, room)
+        pb.add(frame)
+    assert pb.done
+    assert np.array_equal(pb.build(), room)
 
 
-def test_frames_with_a_person_are_rejected():
+def test_someone_standing_in_the_room_does_not_block_capture():
     room = _room()
-    person = np.zeros(room.shape[:2], np.float32)
-    person[20:100, 50:110] = 1.0
-    pb = PlateBuilder(needed=15, min_ok=5, max_cover=0.015)
-    for i in range(15):
-        pb.add(room, person if i < 12 else np.zeros_like(person))
-    assert pb.done and pb.accepted == 3
-    assert pb.build() is None
+    room[20:100, 50:110] = (30, 60, 200)                # a person who stays put the whole time
+    pb = PlateBuilder(needed=15)
+    for _ in range(15):
+        pb.add(room)
+    assert np.array_equal(pb.build(), room)
 
 
-def test_not_done_until_enough_attempts():
+def test_not_done_until_enough_frames():
     pb = PlateBuilder(needed=3)
     room = _room()
-    empty = np.zeros(room.shape[:2], np.float32)
-    pb.add(room, empty)
+    pb.add(room)
     assert not pb.done
-    pb.add(room, empty)
-    pb.add(room, empty)
+    pb.add(room)
+    pb.add(room)
     assert pb.done
+
+
+def test_build_without_frames_returns_none():
+    assert PlateBuilder().build() is None

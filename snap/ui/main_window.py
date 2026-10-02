@@ -210,7 +210,7 @@ class MainWindow(FluentWindow):
 
     def _on_log(self, key: str, kw: dict) -> None:
         self._write_log(f"{key} {kw.get('error', '')}")
-        levels = {"log.plate_ok": "success", "log.plate_person": "warning", "log.need_plate": "warning",
+        levels = {"log.plate_ok": "success", "log.need_plate": "warning",
                   "log.mic_failed": "warning", "log.engine_error": "error", "log.busy": "info"}
         if key in levels:
             self._info(levels[key], t(key, **kw))

@@ -96,7 +96,7 @@ def h(fast):
 def _capture(h):
     h.source.person = False
     h.engine.capture_plate()
-    h.wait(lambda: "log.plate_ok" in h.logs or "log.plate_person" in h.logs)
+    h.wait(lambda: "log.plate_ok" in h.logs)
     h.source.person = True
 
 
@@ -117,11 +117,11 @@ def test_toggle_without_plate_is_refused(h):
     assert h.mode() == "live"
 
 
-def test_plate_capture_fails_while_person_in_frame(h):
+def test_plate_capture_works_with_someone_in_frame(h):
     h.engine.start(h.cfg)
-    h.engine.capture_plate()
-    h.wait(lambda: "log.plate_person" in h.logs)
-    assert not h.engine.status().has_plate
+    h.engine.capture_plate()                       # person stays visible the whole time
+    h.wait(lambda: "log.plate_ok" in h.logs)
+    assert h.engine.status().has_plate
 
 
 def test_countdown_is_reported(h):

@@ -358,19 +358,15 @@ class Engine:
             self._set_status(countdown=0)
             self._publish()
         if self._plate_builder is not None:
-            self._plate_builder.add(self._frame, self._person_mask())
+            self._plate_builder.add(self._frame)
             if self._plate_builder.done:
                 builder, self._plate_builder = self._plate_builder, None
                 self._plate_job = threading.Thread(target=self._build_plate, args=(builder,), daemon=True)
                 self._plate_job.start()
 
     def _build_plate(self, builder: PlateBuilder) -> None:
-        plate = builder.build()
-        if plate is None:
-            self.on_log("log.plate_person", {})
-        else:
-            self.plate = plate
-            self.on_log("log.plate_ok", {})
+        self.plate = builder.build()
+        self.on_log("log.plate_ok", {})
         self._set_status(has_plate=self.plate is not None, capturing=False)
         self._plate_job = None
         self._publish()
